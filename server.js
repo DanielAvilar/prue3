@@ -14,6 +14,13 @@ const port = 3000;
 const controller = require("./controllers/webpay_plus");
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const vendedorRoutes = require('./routes/vendedor');
+const bodegueroRoutes = require('./routes/bodeguero');
+const contadorRoutes = require('./routes/contador');
+app.use('/vendedor', vendedorRoutes);
+app.use('/bodeguero', bodegueroRoutes);
+app.use('/contador', contadorRoutes);
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
