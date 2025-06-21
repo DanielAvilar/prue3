@@ -1,0 +1,146 @@
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f9;
+  color: #333;
+  padding: 1rem;
+}
+
+/* Encabezado */
+header {
+  background-color: #1e90ff;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  font-size: 1.5rem;
+}
+
+header a {
+  color: white;
+  text-decoration: underline;
+}
+
+/* Carrito */
+#carrito-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Ítems del carrito */
+.carrito-item {
+  background: white;
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Info del producto */
+.producto-info p {
+  margin: 0.3rem 0;
+}
+
+.producto-info button {
+  margin-top: 0.5rem;
+  background-color: #dc3545;
+  border: none;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.producto-info button:hover {
+  background-color: #c82333;
+}
+
+/* Controles de cantidad */
+.cantidad-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cantidad-container button {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.cantidad-container button:hover {
+  background-color: #0056b3;
+}
+
+/* Total y botón de pago */
+#total-section {
+  margin-top: 2rem;
+  text-align: right;
+}
+
+#total-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #28a745;
+}
+
+#checkoutBtn {
+  background-color: #28a745;
+  color: white;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#checkoutBtn:hover {
+  background-color: #218838;
+}
+
+/* Mensaje vacío */
+.mensaje-vacio {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #888;
+  margin-top: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .carrito-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cantidad-container {
+    margin-top: 0.5rem;
+  }
+
+  #total-section {
+    text-align: center;
+  }
+}

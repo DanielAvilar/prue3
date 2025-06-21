@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Carrito de Compras | Ferremas</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .carrito-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .producto-info {
+      max-width: 60%;
+    }
+
+    .cantidad-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #total-section {
+      text-align: right;
+      padding: 1rem;
+    }
+
+    #checkoutBtn {
+      padding: 0.6rem 1.2rem;
+      background-color: #28a745;
+      border: none;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #checkoutBtn:hover {
+      background-color: #218838;
+    }
+
+    .mensaje-vacio {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Carrito de Compras</h1>
+    <a href="index.html">← Volver al Catálogo</a>
+  </header>
+
+  <section id="carrito-list"></section>
+
+  <section id="total-section">
+    <p><strong>Total: </strong><span id="total-price">$0.00</span></p>
+    <button id="checkoutBtn">Realizar Pago</button>
+  </section>
+
+  <script>
+    const apiUrl = 'http://localhost:3000';
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const res = await fetch(`${apiUrl}/session`, { credentials: 'include' });
+      const data = await res.json();
+      if (!data.loggedIn) return (window.location.href = 'login.html');
+      renderizarCarrito();
+    });
+
+    async function renderizarCarrito() {
+      const res = await fetch(`${apiUrl}/carrito`, { credentials: 'include' });
+      const data = await res.json();
+      const carrito = data.carrito || [];
+      const contenedor = document.getElementById('carrito-list');
+      contenedor.innerHTML = '';
+
+      let total = 0;
+
+      if (carrito.length === 0) {
+        contenedor.innerHTML = '<p class="mensaje-vacio">Tu carrito está vacío 🛒</p>';
+        document.getElementById('total-price').textContent = '$0.00';
+        return;
+      }
+
+      carrito.forEach(p => {
+        const row = document.createElement('div');
+        row.classList.add('carrito-item');
+
+        const subtotal = p.precio * p.cantidad;
+        total += subtotal;
+
+        row.innerHTML = `
+          <div class="producto-info">
+            <p><strong>${p.nombre}</strong></p>
+            <p>Precio Unitario: $${p.precio.toFixed(2)}</p>
+            <p>Subtotal: $<span id="subtotal-${p.producto_id}">${subtotal.toFixed(2)}</span></p>
+            <button onclick="eliminarDelCarrito(${p.producto_id})">❌ Eliminar</button>
+          </div>
+          <div class="cantidad-container">
+            <label>Cantidad:</label>
+            <button onclick="cambiarCantidad(${p.producto_id}, -1)">➖</button>
+            <span id="cantidad-${p.producto_id}">${p.cantidad}</span>
+            <button onclick="cambiarCantidad(${p.producto_id}, 1)">➕</button>
+          </div>
+        `;
+        contenedor.appendChild(row);
+      });
+
+      document.getElementById('total-price').textContent = `$${total.toFixed(2)}`;
+    }
+
+    async function cambiarCantidad(productoId, cambio) {
+      const cantidadSpan = document.getElementById(`cantidad-${productoId}`);
+      let cantidadActual = parseInt(cantidadSpan.textContent);
+      const nuevaCantidad = cantidadActual + cambio;
+
+      if (nuevaCantidad < 1) {
+        if (!confirm("¿Eliminar el producto del carrito?")) return;
+        return await eliminarDelCarrito(productoId);
+      }
+
+      const res = await fetch(`${apiUrl}/carrito/actualizar`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ producto_id: productoId, cantidad: nuevaCantidad })
+      });
+
+      if (res.ok) {
+        renderizarCarrito();
+      } else {
+        alert("❌ Error al actualizar la cantidad.");
+      }
+    }
+
+    async function eliminarDelCarrito(productoId) {
+      const confirmar = confirm("¿Estás seguro de que deseas eliminar este producto?");
+      if (!confirmar) return;
+
+      const res = await fetch(`${apiUrl}/carrito/${productoId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (res.ok) {
+        renderizarCarrito();
+      } else {
+        alert("❌ Error al eliminar el producto del carrito");
+      }
+    }
+
+    document.getElementById('checkoutBtn').addEventListener('click', async () => {
+      const confirmar = confirm('¿Deseas proceder con el pago?');
+      if (!confirmar) return;
+
+      const res = await fetch(`${apiUrl}/pago/webpay`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.url && data.token) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = data.url;
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'token_ws';
+        input.value = data.token;
+        form.appendChild(input);
+
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        alert('❌ Error al iniciar la transacción con Webpay.');
+      }
+    });
+  </script>
+</body>
+</html>

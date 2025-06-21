@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de Productos</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Catálogo de Productos</h1>
+    <a href="carrito.html">Ir al Carrito</a>
+  </header>
+
+  <section id="productos-list"></section>
+
+ <script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      // Verificar si la sesión está activa utilizando la URL de ngrok
+      const res = await fetch('http://localhost:3000/session', {  // Usa la URL de ngrok correcta
+        credentials: 'include'  // Asegura que se envíen las cookies
+      });
+
+      if (!res.ok) {
+        console.log("No autenticado, redirigiendo a login...");
+        return window.location.href = 'login.html';  // Si no está autenticado, redirigir
+      }
+
+      // Si la sesión es válida, cargar los productos
+      const script = document.createElement('script');
+      script.src = 'js/app.js';
+      script.onload = () => {
+        const wait = setInterval(() => {
+          if (typeof renderizarProductos === 'function') {
+            clearInterval(wait);
+            renderizarProductos(); // Llamar la función para renderizar productos
+          }
+        }, 50);
+      };
+      document.body.appendChild(script);
+
+    } catch (error) {
+      console.error("❌ Error al verificar sesión:", error);
+      window.location.href = 'login.html';  // Redirigir si hay error al verificar sesión
+    }
+  });
+</script>
+
+
+</body>
+</html>

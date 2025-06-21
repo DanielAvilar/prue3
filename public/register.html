@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro de Usuario</title>
+  <link rel="stylesheet" href="css/register.css">
+  <!-- ✅ reCAPTCHA v2 -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+  <header>
+    <h1>Registro de Usuario</h1>
+  </header>
+
+  <div class="register-container">
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="username">Nombre de usuario:</label>
+        <input type="text" id="username" name="username" required placeholder="Ingresa tu nombre de usuario">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Correo electrónico:</label>
+        <input type="email" id="email" name="email" required placeholder="Ingresa tu correo electrónico">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" name="password" required placeholder="Ingresa tu contraseña">
+      </div>
+
+      <div class="form-group">
+        <label for="confirm-password">Confirmar Contraseña:</label>
+        <input type="password" id="confirm-password" name="confirm-password" required placeholder="Confirma tu contraseña">
+      </div>
+
+      <!-- ✅ Widget de reCAPTCHA -->
+      <div class="form-group">
+        <div class="g-recaptcha" data-sitekey="6Lea12UrAAAAAE52mC4tzNodS0ITnO__5lrXSon0"></div>
+      </div>
+
+      <button type="submit">Registrar</button>
+    </form>
+
+    <div style="text-align:center; margin-top: 20px;">
+      <a href="/auth/google">
+        <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" alt="Login con Google">
+      </a>
+    </div>
+
+    <p id="error-message" style="color: red; display: none;"></p>
+    <p id="password-error" style="color: red; display: none;">Las contraseñas no coinciden.</p>
+
+    <p>¿Ya tienes una cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const captcha = grecaptcha.getResponse();
+
+      if (!username || !email || !password || !confirmPassword) {
+        alert("Todos los campos son obligatorios.");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        document.getElementById('password-error').style.display = 'block';
+        return;
+      }
+
+      if (!captcha) {
+        alert("Por favor completa el reCAPTCHA.");
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, email, password, confirmPassword, captcha })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert('Registro exitoso. Redirigiendo al login...');
+          window.location.href = 'login.html';
+        } else {
+          document.getElementById('error-message').textContent = data.error;
+          document.getElementById('error-message').style.display = 'block';
+          grecaptcha.reset(); // resetear el captcha si falló
+        }
+      } catch (error) {
+        console.error("❌ Error en el registro: ", error);
+        alert("Hubo un problema con el registro. Por favor, intenta más tarde.");
+      }
+    });
+</script>
+
+</body>
+</html>
